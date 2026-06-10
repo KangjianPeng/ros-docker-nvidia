@@ -85,25 +85,25 @@ docker build --build-arg ROS_DISTRO=humble -t ros-humble .
 ### ROS1 Noetic
 
 ```bash
-distrobox create --name ros-noetic-env --image ros-noetic --nvidia
+distrobox create --name ros-noetic --image ros-noetic --nvidia
 ```
 
 ### ROS2 Humble
 
 ```bash
-distrobox create --name ros-humble-env --image ros-humble --nvidia
+distrobox create --name ros-humble --image ros-humble --nvidia
 ```
 
-## 3. 进入并开发
+## 3. 进入容器
 
 ### ROS1 Noetic
 
 ```bash
-distrobox enter ros-noetic-env
+distrobox enter ros-noetic
 ```
 
 ### ROS2 Humble
 
 ```bash
-distrobox enter ros-humble-env
+distrobox enter ros-humble
 ```

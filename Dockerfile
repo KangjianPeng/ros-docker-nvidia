@@ -23,7 +23,22 @@ ENV QT_QPA_PLATFORM=xcb
 ENV __NV_PRIME_RENDER_OFFLOAD=1
 ENV __GLX_VENDOR_LIBRARY_NAME=nvidia
 
-# 6. 配置入口脚本，每次启动自动加载对应 ROS 发行版环境变量
-RUN echo '#!/bin/bash\nset -e\nsource /opt/ros/${ROS_DISTRO}/setup.bash\nexec "$@"' > /entrypoint.sh \
-    && chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+# Gaboze和IGN的地址设置
+ENV IGN_IP=127.0.0.1
+ENV GZ_IP=127.0.0.1
+ENV IGN_IPCS_DISABLE=1
+
+# 6. 通过 profile.d 给登录 shell 自动初始化 ROS 环境
+RUN printf '%s\n' \
+    '#!/bin/sh' \
+    'if [ -z "${ROS_ENV_INITIALIZED:-}" ] && [ -n "${ROS_DISTRO:-}" ]; then' \
+    '    if [ -n "${BASH_VERSION:-}" ] && [ -f "/opt/ros/${ROS_DISTRO}/setup.bash" ]; then' \
+    '        . "/opt/ros/${ROS_DISTRO}/setup.bash"' \
+    '        export ROS_ENV_INITIALIZED=1' \
+    '    elif [ -f "/opt/ros/${ROS_DISTRO}/setup.sh" ]; then' \
+    '        . "/opt/ros/${ROS_DISTRO}/setup.sh"' \
+    '        export ROS_ENV_INITIALIZED=1' \
+    '    fi' \
+    'fi' \
+    > /etc/profile.d/ros_setup.sh \
+    && chmod +x /etc/profile.d/ros_setup.sh

@@ -1,5 +1,10 @@
-# 1. 基于官方桌面完整版镜像
-FROM osrf/ros:noetic-desktop-full
+ARG ROS_DISTRO=noetic
+
+# 1. 基于官方桌面完整版镜像，可通过 --build-arg ROS_DISTRO=noetic|humble 切换
+FROM osrf/ros:${ROS_DISTRO}-desktop-full
+
+ARG ROS_DISTRO
+ENV ROS_DISTRO=${ROS_DISTRO}
 
 # 2. 安装 NVIDIA 驱动所需的基础库、X11 测试工具和常用开发工具
 RUN apt-get update && apt-get install -y \
@@ -18,7 +23,7 @@ ENV QT_QPA_PLATFORM=xcb
 ENV __NV_PRIME_RENDER_OFFLOAD=1
 ENV __GLX_VENDOR_LIBRARY_NAME=nvidia
 
-# 6. 配置入口脚本，每次启动自动加载 ROS 环境变量
-RUN echo '#!/bin/bash\nset -e\nsource /opt/ros/noetic/setup.bash\nexec "$@"' > /entrypoint.sh \
+# 6. 配置入口脚本，每次启动自动加载对应 ROS 发行版环境变量
+RUN echo '#!/bin/bash\nset -e\nsource /opt/ros/${ROS_DISTRO}/setup.bash\nexec "$@"' > /entrypoint.sh \
     && chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

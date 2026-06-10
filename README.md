@@ -1,4 +1,9 @@
-# 宿主机前置准备：Arch Linux + NVIDIA + Docker 引擎打通
+# ros-docker-nvidia
+
+## Intro
+
+构建带图形界面支持的 ROS 开发镜像，目标是在 Arch Linux 宿主机上通过 Docker 和 Distrobox 快速启动可用的 ROS 环境。
+当前提供同一份 `Dockerfile` 对 `ROS1 Noetic` 和 `ROS2 Humble` 的支持，并包含 NVIDIA 显卡透传、Xwayland 兼容和一些常用开发工具配置。
 
 ## 第 1 步：确保已安装正确的 NVIDIA 闭源驱动
 
@@ -29,10 +34,9 @@ sudo usermod -aG docker $USER
 
 ## 第 3 步：安装 NVIDIA 容器工具（最核心的桥梁）
 
-这一步是告诉容器如何合法调用宿主机的显卡。以前的老教程会让你装 nvidia-docker2（已废弃），现在的官方标准做法是安装 nvidia-container-toolkit。
+安装 nvidia-container-toolkit。
 
 ```bash
-# Arch 官方仓库已经收录了这个包，直接 pacman 安装
 sudo pacman -S nvidia-container-toolkit
 ```
 
@@ -51,31 +55,55 @@ sudo systemctl restart docker
 
 ## 第 5 步：快速验证宿主机通道是否打通（可选但推荐）
 
-在跑 ROS 之前，我们先用一个极其轻量级的官方测试镜像，看看 Docker 能不能正常读取到显卡。
+在跑 ROS 之前，测试 Docker 能不能正常读取到显卡。
 在终端运行：
 
 ```bash
 docker run --rm --runtime=nvidia --gpus all osrf/ros:noetic-desktop-full nvidia-smi
 ```
 
-如果终端打印出了你熟悉的 NVIDIA-SMI 表格（包含你的显卡型号、显存等信息），那么恭喜你！宿主机的底层配置已经完美无瑕！
+如果终端打印出了你熟悉的 NVIDIA-SMI 表格（包含你的显卡型号、显存等信息），运行正常
 
-## 1. 首先，手动用上面的 Dockerfile 构建一次基础镜像：
+## 1. 首先，手动构建镜像
 
-在 Dockerfile 所在目录执行：
+在 Dockerfile 所在目录执行。这个 Dockerfile 现在同时支持 `ROS1 Noetic` 和 `ROS2 Humble` 以及其他发行版，通过 `ROS_DISTRO` 切换：
+
+### ROS1 Noetic
 
 ```bash
-docker build -t ros-noetic .
+docker build --build-arg ROS_DISTRO=noetic -t ros-noetic .
 ```
 
-## 2. 使用 Distrobox 创建容器（必须加 --nvidia 参数）：
+### ROS2 Humble
 
 ```bash
-distrobox create --name ros-env --image ros-noetic-wayland-base --nvidia
+docker build --build-arg ROS_DISTRO=humble -t ros-humble .
 ```
 
-## 3. 随时进入并开发：
+## 2. 使用 Distrobox 创建容器（必须加 --nvidia 参数）
+
+### ROS1 Noetic
 
 ```bash
-distrobox enter ros-env
+distrobox create --name ros-noetic-env --image ros-noetic --nvidia
+```
+
+### ROS2 Humble
+
+```bash
+distrobox create --name ros-humble-env --image ros-humble --nvidia
+```
+
+## 3. 随时进入并开发
+
+### ROS1 Noetic
+
+```bash
+distrobox enter ros-noetic-env
+```
+
+### ROS2 Humble
+
+```bash
+distrobox enter ros-humble-env
 ```

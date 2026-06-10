@@ -7,15 +7,15 @@
 
 ## 第 1 步：确保已安装正确的 NVIDIA 闭源驱动
 
-由于 Linux 内核更新频繁，在 Arch 上极其推荐使用 dkms 版本的显卡驱动，防止内核升级后驱动失效。
-打开宿主机终端，执行：
+由于 Linux 内核更新频繁，在 Arch 上推荐使用 dkms 版本的显卡驱动
+打开Host主机终端，执行：
 
 ```bash
 # 安装基础驱动、DKMS 模块以及工具包
 sudo pacman -S nvidia-dkms nvidia-utils linux-headers
 ```
 
-> （注：由于你已经在运行纯 Wayland 的 KDE Plasma，你需要确保你的内核启动参数中已经添加了 nvidia_drm.modeset=1，这是 NVIDIA 在 Wayland 下正常工作的基础。一般在 /etc/default/grub 的 GRUB_CMDLINE_LINUX_DEFAULT 中设置，并执行了 sudo grub-mkconfig -o /boot/grub/grub.cfg）
+> 需要确保Host主机的nvidia驱动调用正常
 
 ## 第 2 步：安装 Docker 及其依赖
 
@@ -94,7 +94,7 @@ distrobox create --name ros-noetic-env --image ros-noetic --nvidia
 distrobox create --name ros-humble-env --image ros-humble --nvidia
 ```
 
-## 3. 随时进入并开发
+## 3. 进入并开发
 
 ### ROS1 Noetic
 
